@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:nationality/cubits/nationality/nationality_cubit.dart';
+import 'package:nationality/cubits/number_of_requests/number_of_requests_cubit.dart';
 import 'package:nationality/models/nationality.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -15,8 +16,16 @@ class MyApp extends StatelessWidget {
       return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
     }
 
-    return BlocProvider<NationalityCubit>(
-      create: (context) => NationalityCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<NationalityCubit>(
+          create: (context) => NationalityCubit(),
+        ),
+        BlocProvider<NumberOfRequestsCubit>(
+          create: (context) => NumberOfRequestsCubit(
+              nationalityCubit: context.read<NationalityCubit>()),
+        ),
+      ],
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: "Find the nationality",
@@ -28,6 +37,10 @@ class MyApp extends StatelessWidget {
                     child: Center(
                         child: Column(children: [
                       Padding(padding: EdgeInsets.only(top: 20.0)),
+                      TextNumberOfRequests(),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Text(
                         'Enter your name',
                         style: TextStyle(
@@ -82,6 +95,20 @@ class MyApp extends StatelessWidget {
                       )
                     ])),
                   )))),
+    );
+  }
+}
+
+class TextNumberOfRequests extends StatelessWidget {
+  const TextNumberOfRequests({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'Number of API requests: ${context.watch<NumberOfRequestsCubit>().state.requestsNumber}',
+      style: TextStyle(color: Colors.teal, fontStyle: FontStyle.italic),
     );
   }
 }
